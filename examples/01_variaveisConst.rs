@@ -1,85 +1,98 @@
-// Aula: variáveis e constantes — ver GUIA_RUST.md
+// Aula: variáveis e constantes — ver GUIA_RUST.md (seções 2 a 5)
 // Rode com: cargo run --example 01_variaveisConst
 
-const PI: f64 = 3.14159;
+// ─── Globais: declaradas fora de qualquer função ────────────────────────────
+// Tipo obrigatório e nome em SCREAMING_SNAKE_CASE.
+const PI: f64 = 3.14159; // const: copiada em cada lugar onde é usada
 const MAX_ALUNOS: usize = 40;
 
-static TOTAL: i32 = 30;
+static TOTAL: i32 = 30; // static: um único endereço fixo na memória
 static NOME_CURSO: &str = "Rust do Zero";
 
 fn main() {
-    println!("--- Globais ---");
-    println!("Total: {}", TOTAL);
-    println!("Curso: {}", NOME_CURSO);
-    println!("PI: {}  |  Máximo de alunos: {}", PI, MAX_ALUNOS);
+    // ─── 1. Variáveis (let) ─────────────────────────────────────────────────
+    println!("--- 1. Variáveis ---");
 
-    println!("\n--- Variáveis locais (let) ---");
+    // Imutável por padrão; o compilador infere o tipo (aqui, i32).
     let idade = 25;
     println!("Idade: {}", idade);
+    // idade = 26; // erro de compilação: não dá para reatribuir sem `mut`
 
+    // Com `mut` o valor pode mudar.
     let mut contador = 0;
     contador += 1;
     contador += 1;
     println!("Contador: {}", contador);
 
+    // Tipo explícito (anotação opcional em `let`).
     let altura: f32 = 1.75;
     let ativo: bool = true;
     let letra: char = 'R';
     let saudacao: &str = "Olá";
-    println!("Altura: {}  Ativo: {}  Letra: {}  {}", altura, ativo, letra, saudacao);
+    println!("Altura: {}  Ativo: {}  Letra: {}  Saudação: {}", altura, ativo, letra, saudacao);
 
+    // Tipo pelo sufixo do número; `_` só separa os milhares para leitura.
     let grande = 1_000_000u64;
     let pequeno = 200u8;
     println!("Grande: {}  Pequeno: {}", grande, pequeno);
 
-    println!("\n--- Shadowing ---");
-    let valor = "42";
-    let valor: i32 = valor.parse().unwrap();
-    let valor = valor * 2;
-    println!("Valor: {}", valor);
-
-    println!("\n--- Constantes locais e escopo ---");
-    const DESCONTO: f64 = 0.10;
-    let preco = 100.0;
-    let preco_final = preco * (1.0 - DESCONTO);
-    println!("Preço final: {}", preco_final);
-
-    {
-        let interna = "só existe aqui dentro";
-        println!("{}", interna);
-    }
-
-    let dobro = {
-        let base = 21;
-        base * 2
-    };
-    println!("Dobro: {}", dobro);
-
+    // Declarar agora e atribuir uma única vez depois (continua imutável).
     let resultado: i32;
-    if dobro > 40 {
+    if grande > 1_000 {
         resultado = 1;
     } else {
         resultado = 0;
     }
     println!("Resultado: {}", resultado);
+
+    // Prefixo `_` avisa ao compilador que não usar a variável é intencional.
     let _nao_usada = 99;
 
+    // ─── 2. Shadowing ───────────────────────────────────────────────────────
+    println!("\n--- 2. Shadowing ---");
 
-    println!("\n--- Constantes ---");
+    // Um novo `let` com o mesmo nome cria outra variável — pode até mudar o tipo.
+    let valor = "42"; // &str
+    let valor: i32 = valor.parse().unwrap(); // i32
+    let valor = valor * 2;
+    println!("Valor: {}", valor);
 
-    // const NAME_COMPANY: &str = "code";        // Em const o tipo é obrigatório: não há inferência.
-                                                // Nome de const: SCREAMING_SNAKE_CASE.
+    // ─── 3. Constantes e estáticos ──────────────────────────────────────────
+    println!("\n--- 3. Constantes e estáticos ---");
 
-    let nome = "code";                   // Na ‘string’ não e preciso de inferir o tipo da variável.
-                                                // Conversão snake_case.
+    // Globais (declaradas no topo do arquivo).
+    println!("Curso: {}  |  Total: {}", NOME_CURSO, TOTAL);
+    println!("PI: {}  |  Máximo de alunos: {}", PI, MAX_ALUNOS);
+
+    // const local: só existe dentro desta função.
+    const DESCONTO: f64 = 0.10;
+    let preco = 100.0;
+    let preco_final = preco * (1.0 - DESCONTO);
+    println!("Preço final: {}", preco_final);
+
+    // let × const
+    let nome = "code"; // let: tipo inferido, snake_case
+    const MEU_PASSARALHO: &str = "xibata"; // const: tipo obrigatório, SCREAMING_SNAKE_CASE
     println!("Nome: {}", nome);
-   // nome = "Treinamento";                     // nome é imutavel. Precisa de let mut nome para execução.
 
-    const MEU_PASSARALHO: &str = "xibata";
+    // A const é copiada em cada uso: as duas linhas geram o mesmo código no binário.
+    println!("Nome da Empresa: {}", MEU_PASSARALHO);
+    println!("Nome da Empresa: {}", "xibata");
 
-    println!("Nome da Empresa: {}", "xibata");      // Compilação no binario final
-    println!("Nome da Empresa: {}", MEU_PASSARALHO);
-    println!("Nome da Empresa: {}", MEU_PASSARALHO);
-    println!("Nome da Empresa: {}", MEU_PASSARALHO);
-    println!("Nome: {}", nome);
+    // ─── 4. Escopo ──────────────────────────────────────────────────────────
+    println!("\n--- 4. Escopo ---");
+
+    // Variável criada dentro de { } some ao fechar o bloco.
+    {
+        let interna = "só existe aqui dentro";
+        println!("{}", interna);
+    }
+    // println!("{}", interna); // erro: `interna` não existe aqui fora
+
+    // Um bloco também é uma expressão: a última linha (sem `;`) vira o valor.
+    let dobro = {
+        let base = 21;
+        base * 2
+    };
+    println!("Dobro: {}", dobro);
 }
